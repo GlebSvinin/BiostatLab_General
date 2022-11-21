@@ -1,9 +1,6 @@
-#gen_desc is a genereal descriptive function. 
-#Arguments: 
+#This is a genereal descriptive function. 
+#Input: 
 #1) dat is a dataframe;
-#
-#!!!!All columns must be numeric for proper work, i.e TRUE/FALSE columns should be converted to 1/0 columns.
-#
 #2) groupingvar is a variable for dividing table into two groups regerding to some property of an object. 
 #Default - no groupingvar
 #3) vecnames is a vector of column names to perform descriptive analysis; 
@@ -13,6 +10,7 @@
 #6) tablerownames is a vector of row names for output table
 #7)pval = TRUE adds Mann-Whitney test p-val between column values form colnames of groups defined by groupingvar. Default 
 #pval = FALSE. 
+#
 #Example 1:
 #gen_desc(dat,groupingvar = 'SEX', vecnames = c('CH', 'HDL', 'CITY_01'), vecfuns = c('Me', 'Mean','Perc'), pval = TRUE)
 #                    CH        HDL       CITY_01
@@ -28,10 +26,10 @@
 #Ж     5.55 (4.82; 6.33) 1.47 ±0.37 2287 (37.2 %)
 #pvals             0.136      0.000         MW NA
 #
-#MW NA indicates that Mann-Whitney test is not very appropriate for testing binary variables
+#MW NA indicates that Mann-Whitney test is not very appropriate for binary random variables
 
 #Created 01.10.22
-#Last revisited 01.10.22
+#Revisited 21.11.22
 #By Gleb
 
 library(dplyr)
@@ -111,13 +109,13 @@ gen_desc <- function(dat, groupingvar = 0, vecnames, vecfuns, tablecolnames = c(
   lables = unique(dat$groupvar)
   
   if(pval == TRUE){
-    w_tmp = wilcox.test(dat$addit_column_1[dat$groupvar == lables[1]], dat$addit_column_1[dat$groupvar == lables[2]])
+    w_tmp = wilcox.test(dat$addit_column_1[dat$groupvar == lables[1]] %>% as.numeric(), dat$addit_column_1[dat$groupvar == lables[2]] %>% as.numeric())
     ps = w_tmp$p.value %>% round_ed(3)
     if(l>1){
       for(i in c(2:l)){
         nametmp = vecnames[i]
         dat$tmpcol = dat[[nametmp]]
-        w_tmp = wilcox.test(dat$tmpcol[dat$groupvar == lables[1]], dat$tmpcol[dat$groupvar == lables[2]])
+        w_tmp = wilcox.test(dat$tmpcol[dat$groupvar == lables[1]]  %>% as.numeric(), dat$tmpcol[dat$groupvar == lables[2]] %>% as.numeric())
         p_tmp = w_tmp$p.value %>% round_ed(3)
         ps = c(ps, p_tmp)
       }
